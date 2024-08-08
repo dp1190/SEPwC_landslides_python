@@ -1,8 +1,11 @@
 import argparse
+import numpy as np
+import rasterio
+import geopandas as gpd
 
 def convert_to_rasterio(raster_data, template_raster):
-  
-    return
+    raster_data[:] = template_raster.read(1)
+    return template_raster
 
 
 def extract_values_from_raster(raster, shape_object):
@@ -43,9 +46,9 @@ def main():
     parser.add_argument('--faults',
                     required=True,
                     help="fault location shapefile")
-    parser.add_argument("landslides",
+    parser.add_argument("--landslides",
                     help="the landslide location shapefile")
-    parser.add_argument("output",
+    parser.add_argument("--output",
                     help="the output raster file")
     parser.add_argument('-v', '--verbose',
                     action='store_true',
@@ -54,6 +57,9 @@ def main():
 
     args = parser.parse_args()
 
-
+    topography = rasterio.open(args.topography)
+    topography_data = np.zeros(topography.shape)
+    convert_to_rasterio(topography_data, topography)
+    
 if __name__ == '__main__':
     main()
