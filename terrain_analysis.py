@@ -98,10 +98,20 @@ def main():
                     help="Print progress")
 
     args = parser.parse_args()
-
-    topography = rasterio.open(args.topography)
-    topography_data = np.zeros(topography.shape)
-    convert_to_rasterio(topography_data, topography)
+    
+    topo = rasterio.open(args.topography)
+    geo = rasterio.open(args.geology)
+    lc = rasterio.open(args.landcover)
+    fault = gpd.read_file(args.faults)
+    lslides = gpd.read_file(args.landslides)
+    
+    dem = topo.read(1)
+    x_value, y_value = topo.res
+    slope = calculate_slope(dem, x_value, y_value)
+ 
+    
+    topography_data = np.zeros(topo.shape)
+    convert_to_rasterio(topography_data, topo)
     
 if __name__ == '__main__':
     main()
