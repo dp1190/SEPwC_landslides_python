@@ -4,15 +4,31 @@ import rasterio
 import geopandas as gpd
 
 def convert_to_rasterio(raster_data, template_raster):
+    '''
+    Reads the first layer (band) of the rasters data and copies
+    using '[:]' modifying 'raster_data' array rather than
+    generating a new one.
+'''  
     raster_data[:] = template_raster.read(1)
+   
     return template_raster
 
-
 def extract_values_from_raster(raster, shape_object):
-
-    return
-
-
+    
+    # creates a list of coordinate pairs using the shape objects
+    coord_pairs = [(shape.x, shape.y) for shape in shape_object]
+    
+    # samples the raster at provided coordinates
+    values = raster.sample(coord_pairs)
+    
+    # converts 'values' into a list
+    value_list = []
+    for value_sample in values:
+        value_sample[0]
+    
+    return value_list
+    
+    
 def make_classifier(x, y, verbose=False):
 
     return
