@@ -32,8 +32,17 @@ def extract_values_from_raster(raster, shape_object):
     
     return value_list
 
-
-
+# dem (Digital Elevation Model)
+def calculate_slope(dem, x_value, y_value):
+    
+    # calculates gradient in direction of x and y
+    x, y = np.gradient(dem, x_value, y_value)
+    
+    # calculates slope length and converts to angle in degrees 
+    h_slope_degrees = np.arctan(np.sqrt(x**2 + y**2) * (180 / np.pi))
+    
+    return h_slope_degrees 
+            
 def distance_from_fault_raster(fault):
     distance = proximity(topo)
     
