@@ -1,7 +1,11 @@
 import argparse
 import numpy as np
 import rasterio
+import pandas as pd
 import geopandas as gpd
+import sklearn
+from sklearn.ensemble import RandomForestClassifier
+
 
 def convert_to_rasterio(raster_data, template_raster):
     '''
@@ -24,23 +28,36 @@ def extract_values_from_raster(raster, shape_object):
     # converts 'values' into a list
     value_list = []
     for value_sample in values:
-        value_sample[0]
+        value_list.append(value_sample[0])
     
     return value_list
-    
+
+
+
+def distance_from_fault_raster(fault):
+    distance = proximity(topo)
     
 def make_classifier(x, y, verbose=False):
-
-    return
+    
+    classifier = RandomForestClassifier(verbose=verbose)
+    classifier.fit(x,y)
+    
+    return classifier
 
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
 
     return
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
-
-    return
-
+    
+    return gpd.geodataframe.GeoDataFrame(pd.DataFrame(
+        {'elev':extract_values_from_raster(topo, shape),
+         'fault':extract_values_from_raster(dist_fault, shape),
+         'slope':extract_values_from_raster(slope, shape),
+         'LC':extract_values_from_raster(lc, shape),
+         'Geol':extract_values_from_raster(geo, shape),
+         'ls':landslides}
+        ))
 
 def main():
 
