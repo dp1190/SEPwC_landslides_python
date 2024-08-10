@@ -5,6 +5,7 @@ import pandas as pd
 import geopandas as gpd
 import sklearn
 from sklearn.ensemble import RandomForestClassifier
+from proximity import proximity
 
 
 def convert_to_rasterio(raster_data, template_raster):
@@ -43,8 +44,11 @@ def calculate_slope(dem, x_value, y_value):
     
     return h_slope_degrees 
             
-def distance_from_fault_raster(fault):
-    distance = proximity(topo)
+def distance_from_fault_raster(topo, fault):
+    
+    dist_fault = proximity(topo, fault, 1)
+    
+    return dist_fault
     
 def make_classifier(x, y, verbose=False):
     
