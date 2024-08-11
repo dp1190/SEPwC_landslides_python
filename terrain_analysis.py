@@ -5,7 +5,6 @@ import numpy as np
 import rasterio
 import pandas as pd
 import geopandas as gpd
-
 from sklearn.ensemble import RandomForestClassifier
 from proximity import proximity
 
