@@ -3,7 +3,7 @@ import numpy as np
 import rasterio
 import pandas as pd
 import geopandas as gpd
-import sklearn
+
 from sklearn.ensemble import RandomForestClassifier
 from proximity import proximity
 
@@ -13,48 +13,48 @@ def convert_to_rasterio(raster_data, template_raster):
     Reads the first layer (band) of the rasters data and copies
     using '[:]' modifying 'raster_data' array rather than
     generating a new one.
-'''  
+    '''
     raster_data[:] = template_raster.read(1)
-   
+
     return template_raster
 
 def extract_values_from_raster(raster, shape_object):
-    
+
     # creates a list of coordinate pairs using the shape objects
     coord_pairs = [(shape.x, shape.y) for shape in shape_object]
-    
+
     # samples the raster at provided coordinates
     values = raster.sample(coord_pairs)
-    
+
     # converts 'values' into a list
     value_list = []
     for value_sample in values:
         value_list.append(value_sample[0])
-    
+
     return value_list
 
 # dem (Digital Elevation Model)
 def calculate_slope(dem, x_value, y_value):
-    
+
     # calculates gradient in direction of x and y
     x, y = np.gradient(dem, x_value, y_value)
-    
-    # calculates slope length and converts to angle in degrees 
+
+    # calculates slope length and converts to angle in degrees
     h_slope_degrees = np.arctan(np.sqrt(x**2 + y**2) * (180 / np.pi))
-    
-    return h_slope_degrees 
-            
+
+    return h_slope_degrees
+
 def distance_from_fault_raster(topo, fault):
-    
+
     dist_fault = proximity(topo, fault, 1)
-    
+
     return dist_fault
-    
+
 def make_classifier(x, y, verbose=False):
-    
+
     classifier = RandomForestClassifier(verbose=verbose)
     classifier.fit(x,y)
-    
+
     return classifier
 
 def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
@@ -62,6 +62,7 @@ def make_prob_raster_data(topo, geo, lc, dist_fault, slope, classifier):
     return
 
 def create_dataframe(topo, geo, lc, dist_fault, slope, shape, landslides):
+
     
     return gpd.geodataframe.GeoDataFrame(pd.DataFrame(
         {'elev':extract_values_from_raster(topo, shape),
@@ -102,20 +103,32 @@ def main():
                     help="Print progress")
 
     args = parser.parse_args()
-    
+
     topo = rasterio.open(args.topography)
     geo = rasterio.open(args.geology)
     lc = rasterio.open(args.landcover)
     fault = gpd.read_file(args.faults)
-    lslides = gpd.read_file(args.landslides)
-    
+    landslides = gpd.read_file(args.landslides)
+
     dem = topo.read(1)
     x_value, y_value = topo.res
     slope = calculate_slope(dem, x_value, y_value)
- 
-    
+
+
     topography_data = np.zeros(topo.shape)
     convert_to_rasterio(topography_data, topo)
     
+    geology_data = np.zeros(geo.shape)
+    convert_to_rasterio(geology_data, geo)
+    
+    landcover_data = np.zeros(lc.shape)
+    convert_to_rasterio(landcover_data, lc)
+    
+    dist_fault_data = distance_from_fault_raster(topo, fault)
+    
+
+    df = create_dataframe(topography_data, geology_data, landcover_data,
+                          dist_fault_data, slope, shape, landslides)
+
 if __name__ == '__main__':
     main()
